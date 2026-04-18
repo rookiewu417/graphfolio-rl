@@ -103,3 +103,32 @@ def run_all_baselines(log_returns: pd.DataFrame, cfg) -> dict[str, dict[str, flo
     except Exception as e:
         import logging; logging.getLogger(__name__).warning(f"CSI300 download failed: {e}")
     return results
+
+
+def print_results_table(results: dict[str, dict]):
+    """Pretty-print baseline results in a table."""
+    metrics = ["annual_return", "annual_volatility", "max_drawdown",
+               "sharpe_ratio", "sortino_ratio", "calmar_ratio", "win_rate"]
+    header = f"{'Strategy':<25}" + "".join(f"{m:>18}" for m in metrics)
+    print(header)
+    print("-" * len(header))
+    for name, m in results.items():
+        row = f"{name:<25}" + "".join(f"{m.get(k, float('nan')):>18.4f}" for k in metrics)
+        print(row)
+
+
+if __name__ == "__main__":
+    import logging
+    from src.utils.config import load_config
+    from src.data.downloader import load_data
+    from src.data.features import get_raw_log_returns
+
+    logging.basicConfig(level=logging.INFO)
+    
+    cfg = load_config("configs/default.yaml")
+    symbols = list(cfg.data.universe)
+    data = load_data(cfg)
+    log_returns = get_raw_log_returns(data, symbols)
+    
+    results = run_all_baselines(log_returns, cfg)
+    print_results_table(results)

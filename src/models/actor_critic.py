@@ -111,3 +111,55 @@ class GNNActorCritic(nn.Module):
         log_prob = dist.log_prob(action)
         entropy = dist.entropy()
         return action, log_prob, entropy, value
+
+
+class FlatActorCritic(nn.Module):
+    """No-GNN baseline: flatten node features + portfolio context → MLP → actor/critic.
+    Accepts the same call signature as GNNActorCritic so the training loop is unchanged.
+    """
+
+    def __init__(
+        self,
+        n_assets: int,
+        node_feat_dim: int,
+        actor_dims: list[int] = (256, 128),
+        critic_dims: list[int] = (256, 128),
+        dropout: float = 0.1,
+    ):
+        super().__init__()
+        self.n_assets = n_assets
+        # input: flattened node features + weights + cash + cum_ret
+        in_dim = n_assets * node_feat_dim + n_assets + 2
+
+        actor_in = [in_dim] + list(actor_dims)
+        critic_in = [in_dim] + list(critic_dims)
+
+        self.actor_mlp = _mlp(actor_in, dropout)
+        self.actor_head = nn.Linear(actor_dims[-1], n_assets)
+        self.critic_mlp = _mlp(critic_in, dropout)
+        self.critic_head = nn.Linear(critic_dims[-1], 1)
+
+    def forward(self, node_feats, ind_graph, corr_graph, weights, cash_ratio, cum_return):
+        # node_feats: (B, N, F) or (N, F)
+        if node_feats.dim() == 2:
+            node_feats = node_feats.unsqueeze(0)
+        B = node_feats.shape[0]
+        flat = node_feats.reshape(B, -1)
+        ctx = torch.cat([weights, cash_ratio, cum_return], dim=-1)
+        s = torch.cat([flat, ctx], dim=-1)
+        logits = self.actor_head(self.actor_mlp(s))
+        value = self.critic_head(self.critic_mlp(s)).squeeze(-1)
+        return logits, value
+
+    def get_action_and_value(
+        self,
+        node_feats, ind_graph, corr_graph, weights, cash_ratio, cum_return,
+        deterministic: bool = False,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        logits, value = self(node_feats, ind_graph, corr_graph, weights, cash_ratio, cum_return)
+        probs = F.softmax(logits, dim=-1)
+        dist = torch.distributions.Dirichlet(probs * 10 + 1e-6)
+        action = probs if deterministic else dist.sample()
+        log_prob = dist.log_prob(action)
+        entropy = dist.entropy()
+        return action, log_prob, entropy, value
