@@ -1,0 +1,41 @@
+# Ablation experiment configuration
+# Override specific settings from default.yaml per ablation variant
+
+defaults:
+  - default
+
+# Usage:
+#   pixi run train-ablation --config-name ablation variant=no_graph
+#   pixi run train-ablation --config-name ablation variant=single_view_industry
+#   pixi run train-ablation --config-name ablation variant=single_view_corr
+
+# ── Ablation variants ─────────────────────────────────────────────────────────
+ablation:
+  variant: no_graph  # one of: no_graph | single_view_industry | single_view_corr | full_model
+
+  # Controlled by variant (handled in training code):
+  #   no_graph              → skip GNN; use flat MLP on raw features
+  #   single_view_industry  → only G_ind; disable G_corr
+  #   single_view_corr      → only G_corr; disable G_ind
+  #   full_model            → default (both views + gated fusion)
+
+# Additional ablation axes (set directly):
+graph:
+  fusion:
+    method: gated  # gated | concat | attention | average
+
+model:
+  gnn:
+    type: GAT     # GAT | GCN | GraphSAGE
+    layers: 2
+    hidden_dim: 64
+    heads: 4
+
+features:
+  lookback_window: 60   # 20 | 40 | 60
+
+env:
+  risk_penalty: 0.1     # 0.0 | 0.05 | 0.1  (reward ablation)
+
+wandb:
+  tags: [gnn, ppo, portfolio, a-share, ablation]

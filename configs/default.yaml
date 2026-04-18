@@ -1,0 +1,118 @@
+project:
+  name: graphfolio-rl
+  seed: 42
+  device: cuda  # cuda or cpu
+
+data:
+  tushare_token: ${oc.env:TUSHARE_TOKEN}  # loaded from .env
+  universe:
+    - "600519.SH"  # 贵州茅台
+    - "000858.SZ"  # 五粮液
+    - "300750.SZ"  # 宁德时代
+    - "002594.SZ"  # 比亚迪
+    - "600036.SH"  # 招商银行
+    - "601166.SH"  # 兴业银行
+    - "600276.SH"  # 恒瑞医药
+    - "000661.SZ"  # 长春高新
+    - "600031.SH"  # 三一重工
+    - "601899.SH"  # 紫金矿业
+    - "000725.SZ"  # 京东方A
+    - "002241.SZ"  # 歌尔股份
+    - "600309.SH"  # 万华化学
+    - "002304.SZ"  # 洋河股份
+    - "601628.SH"  # 中国人寿
+    - "600690.SH"  # 海尔智家
+    - "000651.SZ"  # 格力电器
+    - "601318.SH"  # 中国平安
+    - "600585.SH"  # 海螺水泥
+    - "000333.SZ"  # 美的集团
+  start_date: "2018-01-01"
+  end_date: "2024-12-31"
+  train_end: "2022-12-31"
+  val_end: "2023-12-31"
+  # test: 2024-01-01 ~ 2024-12-31
+  frequency: daily
+  cache_dir: data/processed
+
+features:
+  lookback_window: 60   # days for technical indicators & rolling corr
+  technical_indicators:
+    - close_return       # log return
+    - volume_change      # volume change ratio
+    - macd
+    - rsi_14
+    - atr_14
+    - bbands_pct_b
+    - momentum_20
+  normalize: z_score    # z_score or minmax
+
+graph:
+  industry_graph:
+    type: static
+    source: sw_l1        # 申万一级行业
+  corr_graph:
+    type: dynamic
+    window: 60           # rolling correlation window (days)
+    threshold: 0.3       # edge threshold
+    topk: 5              # keep top-k neighbors per node
+    rebuild_freq: weekly # rebuild every Friday
+  fusion:
+    method: gated        # gated | concat | attention | average
+
+model:
+  gnn:
+    type: GAT
+    layers: 2
+    hidden_dim: 64
+    heads: 4
+    dropout: 0.1
+  actor:
+    hidden_dims: [256, 128]
+    dropout: 0.1
+  critic:
+    hidden_dims: [256, 128]
+    dropout: 0.1
+
+env:
+  initial_capital: 1_000_000
+  transaction_cost: 0.001   # 0.1% one-way
+  risk_penalty: 0.1         # lambda for rolling vol penalty
+  vol_window: 20            # rolling vol window (days)
+  rebalance_freq: daily
+
+ppo:
+  n_steps: 2048
+  n_epochs: 10
+  batch_size: 64
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.01
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  learning_rate: 3.0e-4
+  total_timesteps: 500_000
+
+training:
+  val_freq: 10              # validate every N rollouts
+  early_stop_patience: 30
+  checkpoint_dir: results/checkpoints
+  log_dir: experiments
+
+wandb:
+  project: graphfolio-rl
+  entity: null              # set your wandb username here
+  tags: [gnn, ppo, portfolio, a-share]
+
+eval:
+  risk_free_rate: 0.02      # annual, 2% for China
+  benchmark: "000300.SH"   # 沪深300
+  metrics:
+    - annual_return
+    - annual_volatility
+    - max_drawdown
+    - sharpe_ratio
+    - sortino_ratio
+    - calmar_ratio
+    - turnover_rate
+    - win_rate

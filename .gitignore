@@ -1,0 +1,48 @@
+# Pixi (keep pixi.toml and pixi.lock in git; exclude installed env)
+.pixi/
+
+# Secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual envs
+venv/
+.venv/
+env/
+
+# Data (raw & processed can be large)
+data/raw/
+data/processed/
+*.csv
+*.pkl
+*.parquet
+*.h5
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Weights & Biases
+wandb/
+
+# Model checkpoints (track only configs, not weights)
+results/checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
