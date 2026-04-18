@@ -13,7 +13,7 @@ from tqdm import trange
 
 from src.utils.config import load_config, get_device
 from src.data.downloader import load_data, split_data
-from src.data.features import build_feature_matrix, make_lookback_tensor
+from src.data.features import build_feature_matrix, make_lookback_tensor, get_raw_log_returns
 from src.graphs.multi_view import build_multi_view_graphs
 from src.envs.portfolio_env import PortfolioEnv
 from src.models.actor_critic import GNNActorCritic
@@ -181,7 +181,7 @@ def main(config_path: str = "configs/default.yaml"):
     train_data, val_data, _ = split_data(data, cfg)
 
     features = build_feature_matrix(data)
-    log_returns = features["log_return"].unstack("symbol").reindex(columns=symbols)
+    log_returns = get_raw_log_returns(data, symbols)  # raw returns for env reward & graph corr
 
     train_dates = sorted(set(train_data.index.get_level_values("date")))
     node_feats, valid_dates = make_lookback_tensor(

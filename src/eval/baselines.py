@@ -74,10 +74,32 @@ def markowitz(
     return compute_metrics(np.array(log_rets))
 
 
+def csi300_benchmark(start_date: str, end_date: str) -> dict[str, float]:
+    """Download CSI 300 index returns via tushare and compute metrics."""
+    import os, tushare as ts
+    ts.set_token(os.environ["TUSHARE_TOKEN"])
+    pro = ts.pro_api()
+    df = pro.index_daily(
+        ts_code="000300.SH",
+        start_date=start_date.replace("-", ""),
+        end_date=end_date.replace("-", ""),
+        fields="trade_date,close",
+    )
+    df["trade_date"] = pd.to_datetime(df["trade_date"])
+    df = df.sort_values("trade_date").set_index("trade_date")
+    log_rets = np.log(df["close"] / df["close"].shift(1)).dropna().values
+    return compute_metrics(log_rets)
+
+
 def run_all_baselines(log_returns: pd.DataFrame, cfg) -> dict[str, dict[str, float]]:
     """Run all baseline strategies and return results dict."""
     results = {}
     results["equal_weight"] = equal_weight(log_returns)
     results["buy_and_hold"] = buy_and_hold(log_returns)
     results["markowitz"] = markowitz(log_returns, risk_free_rate=cfg.eval.risk_free_rate)
+    try:
+        idx = log_returns.index
+        results["csi300"] = csi300_benchmark(str(idx.min().date()), str(idx.max().date()))
+    except Exception as e:
+        import logging; logging.getLogger(__name__).warning(f"CSI300 download failed: {e}")
     return results

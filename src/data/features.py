@@ -43,6 +43,23 @@ def compute_indicators(price_df: pd.DataFrame) -> pd.DataFrame:
     return df[_INDICATOR_COLS].dropna()
 
 
+def get_raw_log_returns(data: pd.DataFrame, symbols: list[str] = None) -> pd.DataFrame:
+    """
+    Compute raw (un-normalized) log returns.
+    Returns wide DataFrame: index=date, columns=symbol.
+    Used for baseline strategies and environment reward computation.
+    """
+    all_syms = data.index.get_level_values("symbol").unique()
+    frames = {}
+    for sym in all_syms:
+        close = data.xs(sym, level="symbol")["close"].sort_index()
+        frames[sym] = np.log(close / close.shift(1))
+    raw = pd.DataFrame(frames).dropna()
+    if symbols:
+        raw = raw.reindex(columns=symbols)
+    return raw
+
+
 def build_feature_matrix(data: pd.DataFrame) -> pd.DataFrame:
     """
     data: MultiIndex (date, symbol) DataFrame with OHLCV.
