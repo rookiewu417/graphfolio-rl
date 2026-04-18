@@ -78,7 +78,7 @@ class GNNActorCritic(nn.Module):
             h_list.append(h.flatten())
         h_flat = torch.stack(h_list)  # (B, N*gnn_out)
 
-        ctx = torch.cat([weights, cash_ratio.unsqueeze(-1), cum_return.unsqueeze(-1)], dim=-1)
+        ctx = torch.cat([weights, cash_ratio, cum_return], dim=-1)
         return torch.cat([h_flat, ctx], dim=-1)
 
     def forward(
