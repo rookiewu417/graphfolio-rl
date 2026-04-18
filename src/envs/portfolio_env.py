@@ -95,7 +95,7 @@ class PortfolioEnv(gym.Env):
         r_assets = self.returns[self._t]                          # log returns (N,)
         port_log_ret = float(np.dot(new_weights, r_assets))       # portfolio log return
         risk_pen = self.risk_penalty * self._rolling_vol()
-        reward = port_log_ret - risk_pen - tc
+        reward = float(port_log_ret - risk_pen - tc)
 
         self._return_history.append(port_log_ret)
         self._portfolio_value *= np.exp(port_log_ret - tc)

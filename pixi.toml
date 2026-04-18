@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "graphfolio-rl"
 version = "0.1.0"
 description = "Multi-view Graph Neural Network + PPO for A-Share Portfolio Optimization"
@@ -7,7 +7,7 @@ channels = ["conda-forge", "pytorch", "nvidia", "pyg"]
 platforms = ["win-64"]
 
 [dependencies]
-python = ">=3.10,<3.12"
+python = ">=3.12,<3.13"
 # PyTorch with CUDA 12.4 (RTX 4070 Laptop)
 pytorch = { version = ">=2.2", channel = "pytorch" }
 pytorch-cuda = { version = "12.4.*", channel = "pytorch" }
@@ -37,16 +37,13 @@ rich = ">=13.0"
 akshare = ">=1.12"
 tushare = ">=1.4"
 # Technical indicators
-pandas-ta = ">=0.3"
-# RL framework (FinRL + SB3)
-finrl = ">=0.3"
+ta = ">=0.11"
+# RL
 stable-baselines3 = { version = ">=2.2", extras = ["extra"] }
 gymnasium = ">=0.29"
 shimmy = ">=1.3"
 # Portfolio analysis
 quantstats = ">=0.0.62"
-pyfolio-reloaded = ">=0.9"
-empyrical = ">=0.5"
 # Experiment tracking
 wandb = ">=0.16"
 # Config & utilities
