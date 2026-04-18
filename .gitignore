@@ -38,10 +38,21 @@ wandb/
 # Model checkpoints (track only configs, not weights)
 results/checkpoints/
 
-# IDE
+# IDE / Claude Code local settings
 .vscode/
 .idea/
 *.swp
+.claude/
+
+# Test artifacts
+.coverage
+.pytest_cache/
+
+# Logs
+*.log
+
+# One-off debug scripts
+test_cuda.py
 
 # OS
 .DS_Store
