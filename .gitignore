@@ -35,8 +35,14 @@ data/processed/
 # Weights & Biases
 wandb/
 
-# Model checkpoints (track only configs, not weights)
-results/checkpoints/
+# Experiment results (figures, logs, checkpoints, CSVs)
+results/
+
+# Paper drafts
+paper/
+
+# PDFs
+*.pdf
 
 # IDE / Claude Code local settings
 .vscode/
@@ -50,9 +56,6 @@ results/checkpoints/
 
 # Logs
 *.log
-
-# One-off debug scripts
-test_cuda.py
 
 # OS
 .DS_Store

@@ -93,7 +93,9 @@ train-ablation = { cmd = "python -m src.agents.ppo_train --config configs/ablati
 # Evaluation
 backtest = { cmd = "python -m src.eval.backtest --config configs/default.yaml", description = "Run full backtest" }
 baselines = { cmd = "python -m src.eval.baselines", description = "Compute all baseline strategies" }
+visualize = { cmd = "python src/eval/visualize.py", description = "Generate all result figures → results/figures/", env = { KMP_DUPLICATE_LIB_OK = "TRUE" } }
 
 # Testing
 test = { cmd = "pytest tests/ -v --cov=src", description = "Run unit tests" }
+run-all = { cmd = "python run_experiments.py", description = "Run full experiment pipeline: baselines + W3 + W4-W5 + eval" }
 lint = { cmd = "ruff check src/ && black --check src/", description = "Lint and format check" }

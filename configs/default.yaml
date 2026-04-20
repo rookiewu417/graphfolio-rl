@@ -52,10 +52,10 @@ graph:
     source: sw_l1        # 申万一级行业
   corr_graph:
     type: dynamic
-    window: 60           # rolling correlation window (days)
-    threshold: 0.3       # edge threshold
+    window: 20           # short-term rolling correlation window (days)
+    threshold: 0.3       # edge threshold (|corr| >= threshold, signed kept)
     topk: 5              # keep top-k neighbors per node
-    rebuild_freq: weekly # rebuild every Friday
+    rebuild_freq: daily  # rebuild every business day
   fusion:
     method: gated        # gated | concat | attention | average
 
@@ -76,7 +76,7 @@ model:
 env:
   initial_capital: 1_000_000
   transaction_cost: 0.001   # 0.1% one-way
-  risk_penalty: 0.1         # lambda for rolling vol penalty
+  risk_penalty: 0.05        # lambda for rolling vol penalty
   vol_window: 20            # rolling vol window (days)
   rebalance_freq: daily
 
@@ -87,11 +87,11 @@ ppo:
   gamma: 0.99
   gae_lambda: 0.95
   clip_range: 0.2
-  ent_coef: 0.01
+  ent_coef: 0.05
   vf_coef: 0.5
   max_grad_norm: 0.5
   learning_rate: 3.0e-4
-  total_timesteps: 500_000
+  total_timesteps: 150_000
 
 training:
   val_freq: 10              # validate every N rollouts

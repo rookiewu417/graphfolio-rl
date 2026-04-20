@@ -47,9 +47,12 @@ def build_industry_graph(symbols: list[str]) -> Data:
                 edge_index_dst += [j, i]
 
     edge_index = torch.tensor([edge_index_src, edge_index_dst], dtype=torch.long)
+    # Uniform weight = 1.0 so SingleViewGAT always receives edge_attr without branching
+    edge_weight = torch.ones(edge_index.shape[1], dtype=torch.float32)
     return Data(
         num_nodes=n,
         edge_index=edge_index,
+        edge_weight=edge_weight,
         symbols=symbols,
         industry=industries,
     )

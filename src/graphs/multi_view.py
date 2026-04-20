@@ -37,7 +37,7 @@ def build_multi_view_graphs(
         window=g_cfg.corr_graph.window,
         threshold=g_cfg.corr_graph.threshold,
         topk=g_cfg.corr_graph.topk,
-        rebuild_freq="W-FRI",
+        rebuild_freq="B",  # daily rebuild: each day gets a fresh 20-day corr graph
     )
     return MultiViewGraphs(
         symbols=symbols,

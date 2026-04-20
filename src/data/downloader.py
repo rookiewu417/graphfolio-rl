@@ -67,10 +67,11 @@ def load_data(cfg) -> pd.DataFrame:
 
 
 def split_data(data: pd.DataFrame, cfg) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Time-based train/val/test split."""
-    train = data.loc[:cfg.data.train_end]
-    val = data.loc[cfg.data.train_end:cfg.data.val_end]
-    test = data.loc[cfg.data.val_end:]
+    """Time-based train/val/test split (boundaries exclusive on the right)."""
+    dates = data.index.get_level_values("date")
+    train = data[dates <= cfg.data.train_end]
+    val   = data[(dates > cfg.data.train_end) & (dates <= cfg.data.val_end)]
+    test  = data[dates > cfg.data.val_end]
     return train, val, test
 
 
